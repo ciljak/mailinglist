@@ -1,7 +1,7 @@
 <!-- ******************************************************************* -->
 <!-- PHP "self" code handling subscribing into mailinglist               -->
 <!-- ******************************************************************* -->
-<!-- Vrsion: 1.0        Date: x.9.2020 by CDesigner.eu                   -->
+<!-- Vrsion: 1.0        Date: 8-X.9.2020 by CDesigner.eu                 -->
 
 <?php
 	// two variables for message and styling of the mesage with bootstrap
@@ -17,14 +17,16 @@
 	// Control if data was submitted
 	if(filter_has_var(INPUT_POST, 'submit')){
 		// Data obtained from $_postmessage are assigned to local variables
-		$name = htmlspecialchars($_POST['name']);
+		$firstname = htmlspecialchars($_POST['firstname']);
+		$lastname = htmlspecialchars($_POST['lastname']);
 		$email = htmlspecialchars($_POST['email']);
-		$postmessage = htmlspecialchars($_POST['postmessage']); 
+		$gdpr = htmlspecialchars($_POST['gdpr']); 
+		$newsletter = htmlspecialchars($_POST['newsletter']); 
 		
 		$is_result = "true";
 
 		// Controll if all required fields was written
-		if(!empty($email) && !empty($name) && !empty($postmessage)){
+		if(!empty($email) && !empty($firstname) && !empty($lastname)){
 			// If check passed - all needed fields are written
 			// Check if E-mail is valid
 			if(filter_var($email, FILTER_VALIDATE_EMAIL) === false){
@@ -164,7 +166,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title> Guestbook example  </title>
+	<title> mailinglist - subscription  </title>
 	<link rel="stylesheet" href="./css/bootstrap.min.css"> <!-- bootstrap mini.css file -->
 	<link rel="stylesheet" href="./css/style.css"> <!-- my local.css file -->
 	
@@ -173,7 +175,7 @@
 	<nav class="navbar navbar-default">
       <div class="container">
         <div class="navbar-header">    
-          <a class="navbar-brand" href="index.php">Guestbook example v. 1.0</a>
+          <a class="navbar-brand" href="index.php">Mailinglist app v 1.0 - subscribing part</a>
         </div>
       </div>
     </nav>
@@ -183,25 +185,39 @@
     		<div class="alert <?php echo $msgClass; ?>"><?php echo $msg; ?></div>
       <?php endif; ?>	
 
-		<img id="calcimage" src="./images/guestbook.jpg" alt="Calc image" width="200" height="200">
+		<img id="calcimage" src="./images/addmail.png" alt="Calc image" width="200" height="200">
 
       <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
 	      <div class="form-group">
-		      <label>Please provide Your name:</label>
-		      <input type="text" name="name" class="form-control" value="<?php echo isset($_POST['name']) ? $name : 'Your Name'; ?>">
+		      <label>Please provide Your first name:</label>
+		      <input type="text" name="firstname" class="form-control" value="<?php echo isset($_POST['firstname']) ? $firstname : 'Your Firstname'; ?>">
+
+			  <label>Please provide Your last name:</label>
+		      <input type="text" name="lastname" class="form-control" value="<?php echo isset($_POST['lastname']) ? $lastname : 'Your Lastname'; ?>">
 	      </div>
 	      <div class="form-group">
 	      	<label>E-mail:</label>
 	      	<input type="text" name="email" class="form-control" value="<?php echo isset($_POST['email']) ? $email : 'e-mail'; ?>">
 	      </div>
+
 		  <div class="form-group">
-	      	<label>Your message for Guestbook:</label>  <!-- textera for input large text -->
-	      	<textarea id="postmessage" name="postmessage" class="form-control" rows="6" cols="50"><?php echo isset($_POST['postmessage']) ? $postmessage : 'Your text goes here ...'; ?></textarea>
+	      	
+	      	<input type="checkbox" name="gdpr" class="form-control" value="<?php echo isset($_POST['gdpr']) ? $gdpr : 'gdpr'; ?>">
+			<label>I agree with GDPR regulations</label>
+
+			  
+	      	<input type="checkbox" name="newsletter" class="form-control" value="<?php echo isset($_POST['newsletter']) ? $newsletter : 'newsletter'; ?>"> 
+			<label>I subscribe to Newsletter:</label>
 	      </div>
+
+		  <!-- div class="form-group">
+	      	<label>Your message for Guestbook:</label-->  <!-- textera for input large text -->
+	      	<!-- textarea id="postmessage" name="postmessage" class="form-control" rows="6" cols="50"><?php echo isset($_POST['postmessage']) ? $postmessage : 'Your text goes here ...'; ?></textarea>
+	      </div-->
 	 
-		  <button type="submit" name="submit" class="btn btn-warning"> Send your post </button>
+		  <button type="submit" name="submit" class="btn btn-warning"> Subscribe </button>
 		  
-		  <button type="submit" name="delete" class="btn btn-danger"> Delete latest message </button>
+		  <button type="submit" name="delete" class="btn btn-danger"> Unsubscribe </button>
 
 		  <button type="submit" name="reset" class="btn btn-info"> Reset form </button>
 

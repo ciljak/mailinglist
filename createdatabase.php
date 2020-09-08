@@ -1,8 +1,14 @@
 
+<!-- ***************************************************************************** -->
+<!-- PHP  code for automation of preparation databasetable for mailinglist app     -->
+<!-- ***************************************************************************** -->
+<!-- Vrsion: 1.0        Date: 8.9.2020 by CDesigner.eu                             -->
+<!-- ***************************************************************************** -->
+
 <?php // script for accessing database and first table structure establishement
 
 /* Attempt MySQL server connection. Assuming you are running MySQL
-server with default setting (user 'root' with no password) */
+server with  (user 'admin' with  password test*555) */
 $dbc = mysqli_connect("localhost", "admin", "test*555", "test");
  
 // Check connection
@@ -11,13 +17,15 @@ if($dbc === false){
 }
  
 // Attempt create table query execution
-$sql = "CREATE TABLE guestbook(
+$sql = "CREATE TABLE mailinglist(
     id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    firstname_of_writer VARCHAR(30) NOT NULL,
-    secondname_of_writer VARCHAR(30) NOT NULL,
+    firstname_of_subscriber VARCHAR(40) NOT NULL,
+    secondname_of_subscriber VARCHAR(40) NOT NULL,
     write_date DATETIME NOT NULL,
     email VARCHAR(70) NOT NULL, /*  UNIQUE removed because posts with same e-mails must be anabled */
    /* message_text TEXT */ /* optionally add boolean fields for subscription */
+    GDPR_accept BOOLEAN, /* BOOLEAN value if user accepted GDPR */
+    news_accept BOOLEAN  /* BOOLEAN value if user accepted newsletter */
 )";
 if(mysqli_query($dbc, $sql)){
     echo "Table created successfully.";
