@@ -59,7 +59,7 @@ label {
     }
 
 /* ************************************************ */
-/* Guestbook formating                              */
+/* Mailinglist formating                            */
 /* ************************************************ */
 
 h4 { /* seneder of condolence */
@@ -78,21 +78,41 @@ h5 { /* e-mail*/
     padding-left: 5px ;
      }
 
-.guestbook {
+.mailinglist {
     background-color: rgb(218, 255, 162);
    }
 
-  .guestbookbreak  { /*  separation between article of guestbook of white color */
+  .mailinglistbreak  { /*  separation between article of guestbook of white color */
     background-color: rgb(255, 255, 255);
    }
 
-  #guestbooktext { /* p text in article of guestbook */
+  #mailingrights { /* p text in article of guestbook */
     color: #2e2e2e;
     font-size:18px;
     padding: 15px;
     border: 1px solid #2e2e2e;
    }
 
+  
+
+/* ************************************************ */
+/* Subscribers table formating                      */
+/* ************************************************ */
+
+th { /* header of table */
+  padding: 1px 10px 1px 10px;
+  background-color: rgb(186, 255, 82) ;
+  border-bottom: 1px solid #2e2e2e ;
+  border-top: 1px solid #2e2e2e ;
+
+   } 
+
+td { /* cell of table */
+  padding: 1px 10px 1px 10px;
+  background-color: rgb(218, 255, 162) ;
+  border-bottom: 1px dashed #2e2e2e ;
+
+   } 
 /* ************************************************ */
 /* Buttons additional formating                    */
 /* ************************************************ */

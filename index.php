@@ -1,7 +1,8 @@
 <!-- ******************************************************************* -->
 <!-- PHP "self" code handling subscribing into mailinglist               -->
 <!-- ******************************************************************* -->
-<!-- Vrsion: 1.0        Date: 8-X.9.2020 by CDesigner.eu                 -->
+<!-- Vrsion: 1.0        Date: 8-20.9.2020 by CDesigner.eu                -->
+<!-- ******************************************************************* -->
 
 <?php
 	// two variables for message and styling of the mesage with bootstrap
@@ -9,8 +10,12 @@
 	$msgClass = '';
 
 	// default values of auxiliary variables
-	$postmessage ="";
-	$is_result = "false"; //before hitting submit button no result is available
+	$email = "";
+	$firstname = "";
+	$lastname = "";
+	$gdpr = '0';
+	$newsletter = '0';
+	$is_result = false; //before hitting submit button no result is available
 	
 
 
@@ -20,10 +25,10 @@
 		$firstname = htmlspecialchars($_POST['firstname']);
 		$lastname = htmlspecialchars($_POST['lastname']);
 		$email = htmlspecialchars($_POST['email']);
-		$gdpr = htmlspecialchars($_POST['gdpr']); 
-		$newsletter = htmlspecialchars($_POST['newsletter']); 
+		$gdpr = isset($_POST['gdpr']); // checkbox doesnot send post data, they must be checked for its set state !!!
+		$newsletter = isset($_POST['newsletter']); 
 		
-		$is_result = "true";
+		
 
 		// Controll if all required fields was written
 		if(!empty($email) && !empty($firstname) && !empty($lastname)){
@@ -35,20 +40,20 @@
 				$msgClass = 'alert-danger';
 			} else {
 				// E-mail is ok
+				$is_result = true;
 				$toEmail = 'ciljak@localhost.org'; //!!! e-mail address to send to - change for your needs!!!
-				$subject = 'Guestbook entry from '.$name;
+				$subject = 'Guestbook entry from '.$firstname.' '.$lastname;
 				$body = '<h2>To your Guestbook submitted:</h2>
-					<h4>Name</h4><p>'.$name.'</p>
+					<h4>Name</h4><p>'.$firstname.'</p>
 					<h4>Email</h4><p>'.$email.'</p>
-					<h4>Message</h4><p>'.$postmessage.'</p>
-				';
+					';
 
 				// Email Headers
 				$headers = "MIME-Version: 1.0" ."\r\n";
 				$headers .="Content-Type:text/html;charset=UTF-8" . "\r\n";
 
 				// Additional Headers
-				$headers .= "From: " .$name. "<".$email.">". "\r\n";
+				$headers .= "From: " .$lastname. "<".$email.">". "\r\n";
 
 				// !!! Add entry to the database and redraw all postmessages into guestbook list with newest postmessage as first
 
@@ -64,14 +69,14 @@
 						
 						// INSERT new entry
 					    $date = date('Y-m-d H:i:s'); // get current date to log into databse along postmessage written
-						$sql = "INSERT INTO guestbook (name_of_writer, write_date, email, message_text) 
-						VALUES ('$name', '$date', '$email' , '$postmessage')";
+						$sql = "INSERT INTO mailinglist (firstname_of_subscriber, secondname_of_subscriber, write_date, email, GDPR_accept, news_accept) 
+						VALUES ('$firstname', '$lastname', now() , '$email' , '$gdpr' , '$newsletter')";
 
 
 
 						if(mysqli_query($dbc, $sql)){
 							
-							$msg = 'postmessage sucessfully added to database.';
+							$msg = 'new subscriber'.$email.' succesfully added';
 					        $msgClass = 'alert-success';
 						} else{
 							
@@ -101,6 +106,11 @@
   
 	// if delete button clicked
 	if(filter_has_var(INPUT_POST, 'delete')){
+		if(filter_var($email, FILTER_VALIDATE_EMAIL) === false){
+			// E-mail is not walid
+			$msg = 'Please use a valid email';
+			$msgClass = 'alert-danger';
+		} else {
 
 		    $msg = 'Delete last mesage hit';
 			$msgClass = 'alert-danger'; // bootstrap format for allert message with red color
@@ -118,23 +128,25 @@
 			// DELETE last input by matching your written message
 			   // obtain message string for comparison
 
-			   $postmessage = htmlspecialchars($_POST['postmessage']); 
+			   $email = htmlspecialchars($_POST['email']); 
 			   $postmessage = trim($postmessage);
 
 			   // create DELETE query
-			   $sql = "DELETE FROM guestbook WHERE message_text = "."'$postmessage'" ;
+			   $sql = "DELETE FROM mailinglist WHERE email = "."'$email'" ;
 
 
 
 				if(mysqli_query($dbc, $sql)){
 					
-					$msg = 'Last message sucessfully removed from database.';
+					$msg = 'Last subscriber sucessfully removed from database.';
 					$msgClass = 'alert-success';
 
 					// clear entry fileds after sucessfull deleting from database
-					$name ='';
+					$firstname ='';
+					$lastname ='';
 					$email ='';
-					$postmessage = ''; 
+					$gdpr = false; 
+					$newsletter = false; 
 				} else{
 					
 					$msg = "ERROR: Could not able to execute $sql. " . mysqli_error($dbc);
@@ -144,7 +156,7 @@
 			// end connection
 				mysqli_close($dbc);
 
-
+			}
 			
 
 	};
@@ -153,9 +165,11 @@
 	if(filter_has_var(INPUT_POST, 'reset')){
 		$msg = '';
 		$msgClass = ''; // bootstrap format for allert message with red color
-		$name = '';
-		$email = '';
-		$postmessage = '';
+		$firstname ='';
+		$lastname ='';
+		$email ='';
+		$gdpr = false; 
+		$newsletter = false; 
 	};
 		
 ?>
@@ -190,14 +204,14 @@
       <form method="post" action="<?php echo $_SERVER['PHP_SELF']; ?>">
 	      <div class="form-group">
 		      <label>Please provide Your first name:</label>
-		      <input type="text" name="firstname" class="form-control" value="<?php echo isset($_POST['firstname']) ? $firstname : 'Your Firstname'; ?>">
+		      <input type="text" onfocus="this.value='<?php echo isset($_POST['firstname']) ? $firstname : ''; ?>'" name="firstname" class="form-control" value="<?php echo isset($_POST['firstname']) ? $firstname : 'Your Firstname'; ?>">
 
 			  <label>Please provide Your last name:</label>
-		      <input type="text" name="lastname" class="form-control" value="<?php echo isset($_POST['lastname']) ? $lastname : 'Your Lastname'; ?>">
+		      <input type="text" onfocus="this.value='<?php echo isset($_POST['firstname']) ? $lastname : ''; ?>'" name="lastname" class="form-control" value="<?php echo isset($_POST['lastname']) ? $lastname : 'Your Lastname'; ?>">
 	      </div>
 	      <div class="form-group">
 	      	<label>E-mail:</label>
-	      	<input type="text" name="email" class="form-control" value="<?php echo isset($_POST['email']) ? $email : 'e-mail'; ?>">
+	      	<input type="text" onfocus="this.value='<?php echo isset($_POST['email']) ? $email : '@'; ?>'"name="email" class="form-control" value="<?php echo isset($_POST['email']) ? $email : '@'; ?>">
 	      </div>
 
 		  <div class="form-group">
@@ -215,25 +229,25 @@
 	      	<!-- textarea id="postmessage" name="postmessage" class="form-control" rows="6" cols="50"><?php echo isset($_POST['postmessage']) ? $postmessage : 'Your text goes here ...'; ?></textarea>
 	      </div-->
 	 
-		  <button type="submit" name="submit" class="btn btn-warning"> Subscribe </button>
+		  <button type="submit" name="submit" class="btn btn-warning"> Subscribe to mailinglist </button>
 		  
-		  <button type="submit" name="delete" class="btn btn-danger"> Unsubscribe </button>
+		  <button type="submit" name="delete" class="btn btn-danger"> Unsubscribe now </button>
 
 		  <button type="submit" name="reset" class="btn btn-info"> Reset form </button>
+		  <br>
 
-		  <?php   //($is_result == "true") ? {          
-			     // echo "<label> = </label> ";
-				 // echo " <input type="text" id="result_field" name="result_field" value="$result"  >  <br>" ;   
-				 //    } : ''; 
+		  <?php   //part displaying info after succesfull added subscriber into a mailinglist
 				 if ($is_result ) {
 					
 
 						echo "<br> <br>";
-						 echo " <table class=\"table table-success\"> ";
+						echo " <table class=\"table table-success\"> ";
 						echo " <tr>
-						       <td><h5> <em> Yours currently written text is: </em>$postmessage</h5> <td>
-							  </tr> "; 
-							  echo " </table> ";
+							   <td><h5> <em> E-mail: </em> $email </h5> <h5> succesfully added to mailinglist and granted these privileges </h5> ";
+						if ($gdpr == true ) { echo "<h5> GDPR accepted </h5>";	} ; //if GDPR rights granted
+						if ($newsletter == true ) { echo "<h5> Newsletter subscribed </h5>";	} ; //if subscribed to a newsletter	   
+						echo "	   <td>   </tr> "; 
+						echo " </table> ";
 					
 					//echo " <input type="text" id="result_field" name="result_field" value="$result"  >  <br>" ;
 				} ; 
@@ -244,96 +258,7 @@
 
 	  
 
-	  <?php // script for accessing database for all records and then output them in page
-
-			/* Attempt MySQL server connection. Assuming you are running MySQL
-			server with default setting (user 'root' with no password) */
-			$dbc = mysqli_connect("localhost", "admin", "test*555", "test");
-			
-			// Check connection
-			if($dbc === false){
-				die("ERROR: Could not connect to database - stage of article listing. " . mysqli_connect_error());
-			}
-			
-			
-				
-						
-			// read all rows (data) from guestbook table in test database
-			$sql = "SELECT * FROM guestbook ORDER BY id DESC";  // read in reverse order - newest article first
-			/*************************************************************************/
-			/*  Output in Table - solution 1 - for debuging data from database       */
-			/*************************************************************************/
-			/* if data properly selected from guestbook database tabele
-				if($output = mysqli_query($dbc, $sql)){
-					if(mysqli_num_rows($output) > 0){  // if any record obtained from SELECT query
-						// create table output
-						echo "<table>"; //head of table
-							echo "<tr>";
-								echo "<th>id</th>";
-								echo "<th>name_of_writer</th>";
-								echo "<th>write_date</th>";
-								echo "<th>email</th>";
-								echo "<th>message_text</th>";
-							echo "</tr>";
-						while($row = mysqli_fetch_array($output)){ //next rows outputed in while loop
-							echo "<tr>";
-								echo "<td>" . $row['id'] . "</td>";
-								echo "<td>" . $row['name_of_writer'] . "</td>";
-								echo "<td>" . $row['write_date'] . "</td>";
-								echo "<td>" . $row['email'] . "</td>";
-								echo "<td>" . $row['message_text'] . "</td>";
-							echo "</tr>";
-						}
-						echo "</table>";
-						// Free result set
-						mysqli_free_result($output);
-					} else{
-						echo "There is no postmessage in Guestbook. Please wirite one."; // if no records in table
-					}
-				} else{
-					echo "ERROR: Could not able to execute $sql. " . mysqli_error($dbc); // if database query problem
-				}
-            */
-			/*************************************************************************/
-			/*  Output in form of Article - solution 2 - for Guestbook functionality */
-			/*************************************************************************/
-			// if data properly selected from guestbook database table
-			if($output = mysqli_query($dbc, $sql)){
-				if(mysqli_num_rows($output) > 0){  // if any record obtained from SELECT query
-					
-					// create Guestbook articles on page
-					
-					echo "<h4>Our cutomers written into the Guestbook</h4>";
-					echo "<br>";
-
-					while($row = mysqli_fetch_array($output)){ //next rows outputed in while loop
-						
-							// echo "<td>" . $row['id'] . "</td>"; //id is not important for common visitors
-							echo " <div class=\"guestbook\"> " ;
-							echo "<h4>" ."<b>From: </b>" . $row['name_of_writer'] . "</h4>";
-							echo "<h6>" ."<b>Date of postmessage: </b>" . $row['write_date'] . "</h6>";
-							echo "<h5>" ." <b>E-mail of sender: </b>" . $row['email'] . "</h5>";
-							echo "<p id=\"guestbooktext\">" . "  <b>Text of the message: </b> <em>" . $row['message_text'] . "</em></p>";
-							//echo "<br>";
-							echo " </div> " ;
-
-							echo " <div class=\"guestbookbreak\"> " ;
-							echo "<br>";
-							echo " </div> " ;
-					}
-					echo "<br>";
-					// Free result set - free the memory associated with the result
-					mysqli_free_result($output);
-				} else{
-					echo "There is no postmessage in Guestbook. Please wirite one."; // if no records in table
-				}
-			} else{
-				echo "ERROR: Could not able to execute $sql. " . mysqli_error($dbc); // if database query problem
-			}
-
-			// Close connection
-			mysqli_close($dbc);
-			?>
+	  
 		
 		</div>
 		

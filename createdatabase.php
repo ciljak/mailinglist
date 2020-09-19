@@ -22,7 +22,7 @@ $sql = "CREATE TABLE mailinglist(
     firstname_of_subscriber VARCHAR(40) NOT NULL,
     secondname_of_subscriber VARCHAR(40) NOT NULL,
     write_date DATETIME NOT NULL,
-    email VARCHAR(70) NOT NULL, /*  UNIQUE removed because posts with same e-mails must be anabled */
+    email VARCHAR(70) NOT NULL UNIQUE, /* UNIQUE e-mails enabled only as security befor sending duplicite messages */
    /* message_text TEXT */ /* optionally add boolean fields for subscription */
     GDPR_accept BOOLEAN, /* BOOLEAN value if user accepted GDPR */
     news_accept BOOLEAN  /* BOOLEAN value if user accepted newsletter */
