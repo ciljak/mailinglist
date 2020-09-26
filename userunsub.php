@@ -7,7 +7,9 @@
 
 
 <?php
-	// two variables for message and styling of the mesage with bootstrap
+    // two variables for message and styling of the mesage with bootstrap
+    require_once('appvars.php'); // including variables for database
+
 	$msg = '';
     $msgClass = '';
     $msg_about_contains_email = '';
@@ -39,7 +41,7 @@
                 // E-mail is walid - now delete row with matching e-mail
 
                         // make database connection
-                    $dbc = mysqli_connect("localhost", "admin", "test*555", "test");
+                    $dbc = mysqli_connect(DB_HOST, DB_USER, DB_PW, DB_NAME);
 
                     // Check connection
                         if($dbc === false){

@@ -6,10 +6,11 @@
 <!-- ***************************************************************************** -->
 
 <?php // script for accessing database and first table structure establishement
+require_once('appvars.php'); // including variables for database
 
 /* Attempt MySQL server connection. Assuming you are running MySQL
 server with  (user 'admin' with  password test*555) */
-$dbc = mysqli_connect("localhost", "admin", "test*555", "test");
+$dbc = mysqli_connect(DB_HOST, DB_USER, DB_PW, DB_NAME);
  
 // Check connection
 if($dbc === false){

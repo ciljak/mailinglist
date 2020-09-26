@@ -6,6 +6,7 @@
 
 
 <?php
+    require_once('appvars.php'); // including variables for database
 	// two variables for message and styling of the mesage with bootstrap
 	$msg = '';
 	$msgClass = '';
@@ -35,7 +36,7 @@
                 // E-mail is walid - now delete row with matching e-mail
 
                         // make database connection
-                    $dbc = mysqli_connect("localhost", "admin", "test*555", "test");
+                    $dbc = mysqli_connect(DB_HOST, DB_USER, DB_PW, DB_NAME);
 
                     // Check connection
                         if($dbc === false){
@@ -169,7 +170,7 @@
 
 			/* Attempt MySQL server connection. Assuming you are running MySQL
 			server with default setting (user 'root' with no password) */
-			$dbc = mysqli_connect("localhost", "admin", "test*555", "test");
+			$dbc = mysqli_connect(DB_HOST, DB_USER, DB_PW, DB_NAME);
 			
 			// Check connection
 			if($dbc === false){

@@ -5,6 +5,7 @@
 <!-- ******************************************************************* -->
 
 <?php
+    require_once('appvars.php'); // including variables for database
 	// two variables for message and styling of the mesage with bootstrap
 	$msg = '';
 	$msgClass = '';
@@ -60,8 +61,7 @@
 				   // insert into databse 
 
 						// make database connection
-						$dbc = mysqli_connect("localhost", "admin", "test*555", "test");
- 
+						$dbc = mysqli_connect(DB_HOST, DB_USER, DB_PW, DB_NAME);
                         // Check connection
 							if($dbc === false){
 								die("ERROR: Could not connect to database. " . mysqli_connect_error());
@@ -118,7 +118,7 @@
             // delete from database
 
 			// make database connection
-			$dbc = mysqli_connect("localhost", "admin", "test*555", "test");
+			$dbc = mysqli_connect(DB_HOST, DB_USER, DB_PW, DB_NAME);
 
 			// Check connection
 				if($dbc === false){
