@@ -1,20 +1,24 @@
 <!-- ******************************************************************* -->
-<!-- PHP "self" code handling unsubscribing from mailinglist             -->
+<!-- PHP "self" code handling unsubscribing from mailinglist  for users  -->
 <!-- ******************************************************************* -->
-<!-- Vrsion: 1.0        Date: 8-X.9.2020 by CDesigner.eu                 -->
+<!-- Vrsion: 1.0        Date: 26.9.2020 by CDesigner.eu                  -->
+<!-- ******************************************************************* -->
 
 
 
 <?php
 	// two variables for message and styling of the mesage with bootstrap
 	$msg = '';
-	$msgClass = '';
+    $msgClass = '';
+    $msg_about_contains_email = '';
+    $msgClass_email = '';
 
 	// default values of auxiliary variables
     $email ="";
   
 
     $is_removed = false; //before hitting submit button no result is available
+    $is_present = false; // email is not in the table - default before slecting against user submitted email for deletion
     
     if(filter_has_var(INPUT_POST, 'submit')){
 		// Data obtained from $_postmessage are assigned to local variables
@@ -42,29 +46,45 @@
                             die("ERROR: Could not connect to database. " . mysqli_connect_error());
                         }
                     
-                  
-
-                    // create DELETE query
-                    $sql = "DELETE FROM mailinglist WHERE email = "."'$email'" ;
-
+                    // get info if appropriate e-mail is in mailinglist
+                       // create DELETE query
+                        $sql = "SELECT email FROM mailinglist WHERE email = "."'$email'";
 
 
-                        if(mysqli_query($dbc, $sql)){
+
+                        if(($row['email'] = mysqli_fetch_array($result = mysqli_query($dbc, $sql))) != ''){
                             
-                            $msg = 'Subscriber with e-mail: '.$email. ' has been succesfully removed from mailinglist.';
-                            $msgClass = 'alert-success';
-                            $is_removed = true;
+                            $msg_about_contains_email = 'Subscriber with e-mail: '.$email. ' was found in database for deletion.';
+                            $msgClass_email = 'alert-success';
+                            $is_present = true;
+
+                            // create DELETE query
+                            $sql = "DELETE FROM mailinglist WHERE email = "."'$email'"." LIMIT 1";
+
+                            if(mysqli_query($dbc, $sql)){
+                            
+                                $msg = 'Subscriber with e-mail: '.$email. ' has been succesfully removed from mailinglist.';
+                                $msgClass = 'alert-success';
+                                $is_removed = true;
 
                             // clear entry fields after sucessfull deleting from database
                             
                             
-                           
-                        } else{
+                        
+                                };
                             
+                            
+                        
+                        } else{
+                            $msg_about_contains_email = 'Subscriber with e-mail: '.$email. ' was not found in database for deletion. Probably was not subscribed for mailing.';
+                            $msgClass_email = 'alert-warning';
                             $msg = "ERROR: Could not able to execute $sql. " . mysqli_error($dbc);
                             $msgClass = 'alert-danger';
-                            $is_removed = false;
-                        }
+                            $is_present = false;
+                        };
+
+
+                   
 
                     // end connection
                         mysqli_close($dbc);
@@ -89,7 +109,8 @@
 		$msg = '';
 		$msgClass = ''; // bootstrap format for allert message with red color
 		$subject ='';
-		$email ='';
+        $email ='';
+        $msg_about_contains_email = '';
 		
 	};
 		
@@ -101,7 +122,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title> mailinglist - unsubscribe from mailinglist </title>
+    <title> mailinglist - user unsubscribe </title>
     
 	<link rel="stylesheet" href="./css/bootstrap.min.css"> <!-- bootstrap mini.css file -->
 	<link rel="stylesheet" href="./css/style.css"> <!-- my local.css file -->
@@ -111,15 +132,23 @@
 	<nav class="navbar navbar-default">
       <div class="container">
         <div class="navbar-header">    
-          <a class="navbar-brand" href="index.php">Mailinglist app v 1.0 - unsubscribe from mailinglist</a>
+          <a class="navbar-brand" href="index.php">Mailinglist app v 1.0 - unsubscribing for user</a>
         </div>
       </div>
     </nav>
     <div class="container">	
+    <?php
+     echo ' <button class="btn btn-secondary btn-lg " onclick="location.href=\'index.php\'" type="button">  Return to home -> </button>';
+     ?>
+      <br><br>
     	
-	  <?php if($msg != ''): ?>
-    		<div class="alert <?php echo $msgClass; ?>"><?php echo $msg; ?></div>
+	  <?php if($msg_about_contains_email != ''): ?>
+    		<div class="alert <?php echo $msgClass_email; ?>"><?php echo $msg_about_contains_email; ?></div>
       <?php endif; ?>	
+
+      <?php if($msg != ''): ?>
+    		<div class="alert <?php echo $msgClass; ?>"><?php echo $msg; ?></div>
+      <?php endif; ?>
 
 		<img id="calcimage" src="./images/unsubscribe.png" alt="Calc image" width="200" height="200">
 
@@ -165,73 +194,7 @@
 
 	  
 
-	  <?php // code showing all subscribers in form of a table at end of the page
-
-			/* Attempt MySQL server connection. Assuming you are running MySQL
-			server with default setting (user 'root' with no password) */
-			$dbc = mysqli_connect("localhost", "admin", "test*555", "test");
-			
-			// Check connection
-			if($dbc === false){
-				die("ERROR: Could not connect to database - stage of article listing. " . mysqli_connect_error());
-			}
-			
-			
-				
-						
-			// read all rows (data) from guestbook table in "test" database
-			$sql = "SELECT * FROM mailinglist ORDER BY id DESC";  // read in reverse order - newest article first
-			/*************************************************************************/
-			/*  Output in Table - solution 1 - for debuging data from database       */
-			/*************************************************************************/
-            // if data properly selected from guestbook database tabele
-            
-            echo "<h4>Our subscribers mailinglist</h4>";
-			echo "<br>";
-			
-			echo ' <button class="btn btn-secondary btn-lg " onclick="location.href=\'mailer.php\'" type="button">  Return to mailer -> </button>';
-
-			echo "<br>";
-			echo "<br>";
-            
-				if($output = mysqli_query($dbc, $sql)){
-					if(mysqli_num_rows($output) > 0){  // if any record obtained from SELECT query
-						// create table output
-						echo "<table>"; //head of table
-							echo "<tr>";
-								echo "<th>id</th>";
-								echo "<th>firstname</th>";
-                                echo "<th>lastname</th>";
-                                echo "<th>date</th>";
-								echo "<th>email</th>";
-								
-							echo "</tr>";
-                        while($row = mysqli_fetch_array($output)){ //next rows outputed in while loop
-                            echo " <div class=\"mailinglist\"> " ;
-							echo "<tr>";
-								echo "<td>" . $row['id'] . "</td>";
-								echo "<td>" . $row['firstname_of_subscriber'] . "</td>";
-								echo "<td>" . $row['secondname_of_subscriber'] . "</td>";
-								echo "<td>" . $row['write_date'] . "</td>";
-								echo "<td>" . $row['email'] . "</td>";
-                            echo "</tr>";
-                            echo " </div> " ;
-						}
-						echo "</table>";
-						// Free result set
-						mysqli_free_result($output);
-					} else{
-						echo "There is no postmessage in Guestbook. Please wirite one."; // if no records in table
-					}
-				} else{
-					echo "ERROR: Could not able to execute $sql. " . mysqli_error($dbc); // if database query problem
-				}
-            
-			
-
-			// Close connection
-			mysqli_close($dbc);
-			?>
+	
 		
 		</div>
 		

@@ -194,6 +194,7 @@
       </div>
     </nav>
     <div class="container">	
+		
     	
 	  <?php if($msg != ''): ?>
     		<div class="alert <?php echo $msgClass; ?>"><?php echo $msg; ?></div>
@@ -234,6 +235,10 @@
 		  <button type="submit" name="delete" class="btn btn-danger"> Unsubscribe now </button>
 
 		  <button type="submit" name="reset" class="btn btn-info"> Reset form </button>
+          <br><br>
+		  <?php
+		  echo ' <button class="btn btn-secondary btn-lg " onclick="location.href=\'userunsub.php\'" type="button">  Unsubscribe by e-mail -> </button>';
+		  ?>
 		  <br>
 
 		  <?php   //part displaying info after succesfull added subscriber into a mailinglist
